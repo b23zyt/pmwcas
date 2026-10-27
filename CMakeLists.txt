@@ -222,7 +222,7 @@ if(${GOOGLE_FRAMEWORK})
     PREFIX "${GLOG_PREFIX}"
     DEPENDS GFlagsExternal
     # cmake arguments
-    CMAKE_ARGS -DCMAKE_PREFIX_PATH=${GFLAGS_LOCATION}
+    CMAKE_ARGS -DCMAKE_PREFIX_PATH=${GFLAGS_LOCATION} -DCMAKE_CXX_FLAGS=-std=gnu++14
 
     # Disable install step
     INSTALL_COMMAND ""
