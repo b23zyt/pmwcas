@@ -233,15 +233,23 @@ class TlsAllocator : public IAllocator {
       numa_set_preferred(i);
       numa_memory_[i] = (char *)mmap(
           nullptr, kNumaMemorySize, PROT_READ | PROT_WRITE,
-          MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB | MAP_POPULATE, -1, 0);
-
+          MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB | MAP_POPULATE, -1, 0); // eceubuntu doesn't havehuge pages, return (void *)-1
+      if(numa_memory_[i] == MAP_FAILED) {
+        numa_memory_[i] = (char *)mmap(
+          nullptr, kNumaMemorySize, PROT_READ | PROT_WRITE,
+          MAP_ANONYMOUS | MAP_PRIVATE | MAP_NORESERVE, -1, 0);
+      }
+      if(numa_memory_[i] == MAP_FAILED){
+        perror("TlsAllocator mmap");
+        abort();
+      }
       numa_allocated_[i] = 0;
     }
   }
 
   ~TlsAllocator() {
     int nodes = numa_max_node();
-    for(int i = 0; i < nodes; ++i) {
+    for(int i = 0; i <= nodes; ++i) {     // Doesn't free the last NUMA node's memory
       numa_free(numa_memory_[i], kNumaMemorySize);
     }
   }
